@@ -1,0 +1,71 @@
+services:
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    container_name: prometheus
+    hostname: prometheus
+    restart: on-failure
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - nifi-token:/etc/prometheus/secrets:ro
+      - monitoring-prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - default
+      - nifi_network
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:9090/-/healthy || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  nifi-token-refresher:
+    image: curlimages/curl:8.10.1
+    container_name: nifi-token-refresher
+    restart: unless-stopped
+    user: root
+    networks:
+      - nifi_network
+    environment:
+      NIFI_URL: "https://nifi:8443"
+      NIFI_USER: "admin"
+      NIFI_PASS: "admin123456789"
+      REFRESH_INTERVAL: "21600"
+    volumes:
+      - nifi-token:/secrets
+      - ./prometheus/refresh_token.sh:/refresh_token.sh:ro
+    entrypoint: [ "/bin/sh", "/refresh_token.sh" ]
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: grafana
+    hostname: grafana
+    restart: on-failure
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin123456789
+    volumes:
+      - monitoring-grafana-data:/var/lib/grafana
+
+volumes:
+  monitoring-prometheus-data:
+  monitoring-grafana-data:
+  nifi-token:
+
+networks:
+  default:
+  nifi_network:
+    external: true
+    name: "data-collector_data-collector-net"
