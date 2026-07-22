@@ -1,0 +1,2 @@
+dashboard name : NiFi PrometheusReportingTask Dashboard
+dashboard id : 12314
