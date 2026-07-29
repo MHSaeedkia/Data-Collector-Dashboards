@@ -1,2 +1,0 @@
-dashboard name : Kafka Exporter Overview (rfvbkm/kafka-exporter)
-dashboard id : 25462
