@@ -1,0 +1,2 @@
+Redis Dashboard for Prometheus Redis Exporter 1.x
+dashboard id : 763
