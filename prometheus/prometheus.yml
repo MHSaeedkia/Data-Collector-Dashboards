@@ -25,3 +25,6 @@ scrape_configs:
   - job_name: 'kafka-staleness'
     static_configs:
       - targets: ['kafka-staleness-exporter:9309']
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['host.docker.internal:9100']
