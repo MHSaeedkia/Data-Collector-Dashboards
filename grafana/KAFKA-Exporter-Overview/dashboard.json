@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 9,
+  "id": 13,
   "links": [
     {
       "asDropdown": false,
@@ -37,7 +37,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "ffrw6rzzeiqdcf"
+        "uid": "dftgy57zq31fkd"
       },
       "description": "Number of brokers in the Kafka cluster",
       "fieldConfig": {
@@ -88,7 +88,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "ffrw6rzzeiqdcf"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "kafka_brokers{instance=~\"$instance\"}",
@@ -103,7 +103,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "ffrw6rzzeiqdcf"
+        "uid": "dftgy57zq31fkd"
       },
       "description": "Number of topics matching the topic filter",
       "fieldConfig": {
@@ -154,7 +154,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "ffrw6rzzeiqdcf"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "count(kafka_topic_partitions{instance=~\"$instance\"})",
@@ -169,7 +169,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "ffrw6rzzeiqdcf"
+        "uid": "dftgy57zq31fkd"
       },
       "description": "Total number of partitions across all topics",
       "fieldConfig": {
@@ -220,7 +220,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "ffrw6rzzeiqdcf"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "sum(kafka_topic_partitions{instance=~\"$instance\"})",
@@ -235,7 +235,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "ffrw6rzzeiqdcf"
+        "uid": "dftgy57zq31fkd"
       },
       "description": "Number of consumer groups known to the exporter",
       "fieldConfig": {
@@ -286,7 +286,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "ffrw6rzzeiqdcf"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "count(kafka_consumergroup_members{instance=~\"$instance\"})",
@@ -301,7 +301,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "ffrw6rzzeiqdcf"
+        "uid": "dftgy57zq31fkd"
       },
       "description": "Topic/partitions where a consumer group has a committed offset but no active member (kafka_topic_partition_consumer == 0)",
       "fieldConfig": {
@@ -357,7 +357,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "ffrw6rzzeiqdcf"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "count(kafka_topic_partition_consumer{instance=~\"$instance\", topic=~\"$topic\", consumer_id=\"-\"} == 0) or vector(0)",
@@ -372,9 +372,9 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "ffrw6rzzeiqdcf"
+        "uid": "dftgy57zq31fkd"
       },
-      "description": "Rate of produced messages per topic",
+      "description": "Messages consumed per minute per consumer group and topic",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -424,7 +424,7 @@
               }
             ]
           },
-          "unit": "mps"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -434,7 +434,7 @@
         "x": 0,
         "y": 5
       },
-      "id": 6,
+      "id": 9,
       "options": {
         "legend": {
           "calcs": [
@@ -456,22 +456,22 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "ffrw6rzzeiqdcf"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
-          "expr": "sum(rate(kafka_topic_partition_current_offset{instance=~\"$instance\", topic=~\"$topic\"}[$__rate_interval])) by (topic)",
-          "legendFormat": "{{topic}}",
+          "expr": "sum(delta(kafka_consumergroup_current_offset{instance=~\"$instance\", topic=~\"$topic\"}[5m])/5) by (consumergroup, topic)",
+          "legendFormat": "{{consumergroup}} ({{topic}})",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Messages Produced per Second",
+      "title": "Messages Consumed per Minute",
       "type": "timeseries"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "ffrw6rzzeiqdcf"
+        "uid": "dftgy57zq31fkd"
       },
       "description": "Approximate lag of consumer groups per topic",
       "fieldConfig": {
@@ -555,7 +555,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "ffrw6rzzeiqdcf"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "sum(kafka_consumergroup_lag{instance=~\"$instance\", topic=~\"$topic\"}) by (consumergroup, topic)",
@@ -570,205 +570,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "ffrw6rzzeiqdcf"
-      },
-      "description": "Messages produced per minute per topic",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 5,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 0,
-        "y": 14
-      },
-      "id": 8,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max",
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ffrw6rzzeiqdcf"
-          },
-          "editorMode": "code",
-          "expr": "sum(delta(kafka_topic_partition_current_offset{instance=~\"$instance\", topic=~\"$topic\"}[5m])/5) by (topic)",
-          "legendFormat": "{{topic}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Messages Produced per Minute",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "ffrw6rzzeiqdcf"
-      },
-      "description": "Messages consumed per minute per consumer group and topic",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 5,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 12,
-        "y": 14
-      },
-      "id": 9,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max",
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ffrw6rzzeiqdcf"
-          },
-          "editorMode": "code",
-          "expr": "sum(delta(kafka_consumergroup_current_offset{instance=~\"$instance\", topic=~\"$topic\"}[5m])/5) by (consumergroup, topic)",
-          "legendFormat": "{{consumergroup}} ({{topic}})",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Messages Consumed per Minute",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "ffrw6rzzeiqdcf"
+        "uid": "dftgy57zq31fkd"
       },
       "description": "Number of partitions per topic",
       "fieldConfig": {
@@ -794,7 +596,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 23
+        "y": 14
       },
       "id": 10,
       "options": {
@@ -826,7 +628,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "ffrw6rzzeiqdcf"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "sum by (topic) (kafka_topic_partitions{instance=~\"$instance\", topic=~\"$topic\"})",
@@ -841,7 +643,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "ffrw6rzzeiqdcf"
+        "uid": "dftgy57zq31fkd"
       },
       "description": "Number of active members per consumer group",
       "fieldConfig": {
@@ -901,7 +703,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 23
+        "y": 14
       },
       "id": 11,
       "options": {
@@ -911,9 +713,7 @@
           ],
           "displayMode": "table",
           "placement": "bottom",
-          "showLegend": true,
-          "sortBy": "Last *",
-          "sortDesc": false
+          "showLegend": true
         },
         "tooltip": {
           "mode": "multi",
@@ -925,7 +725,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "ffrw6rzzeiqdcf"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "kafka_consumergroup_members{instance=~\"$instance\"}",
@@ -940,7 +740,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "ffrw6rzzeiqdcf"
+        "uid": "dftgy57zq31fkd"
       },
       "description": "Partitions with a committed offset but no active consumer, per topic and consumer group (kafka_topic_partition_consumer == 0)",
       "fieldConfig": {
@@ -1000,7 +800,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 23
+        "y": 14
       },
       "id": 12,
       "options": {
@@ -1022,7 +822,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "ffrw6rzzeiqdcf"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "count by (topic, consumergroup) (kafka_topic_partition_consumer{instance=~\"$instance\", topic=~\"$topic\", consumer_id=\"-\"} == 0)",
@@ -1037,7 +837,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "ffrw6rzzeiqdcf"
+        "uid": "dftgy57zq31fkd"
       },
       "description": "Active consumer assignment per topic/partition (kafka_topic_partition_consumer == 1)",
       "fieldConfig": {
@@ -1070,7 +870,7 @@
         "h": 11,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 23
       },
       "id": 13,
       "options": {
@@ -1096,7 +896,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "ffrw6rzzeiqdcf"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -1134,10 +934,440 @@
         }
       ],
       "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "dftgy57zq31fkd"
+      },
+      "description": "Rate of produced messages per topic",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "mps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 34
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "dftgy57zq31fkd"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(kafka_topic_partition_current_offset{instance=~\"$instance\", topic=~\"$topic\"}[$__rate_interval])) by (topic)",
+          "legendFormat": "{{topic}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Messages Produced per Second",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "dftgy57zq31fkd"
+      },
+      "description": "Messages produced per minute per topic",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 34
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "dftgy57zq31fkd"
+          },
+          "editorMode": "code",
+          "expr": "sum(delta(kafka_topic_partition_current_offset{instance=~\"$instance\", topic=~\"$topic\"}[5m])/5) by (topic)",
+          "legendFormat": "{{topic}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Messages Produced per Minute",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "dftgy57zq31fkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 43
+      },
+      "id": 14,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "dftgy57zq31fkd"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "sum(increase(kafka_topic_partition_current_offset{instance=~\"$instance\", topic=~\"$topic\"}[1h])) by (topic)",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Messages Produced hours",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "dftgy57zq31fkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 51
+      },
+      "id": 15,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "dftgy57zq31fkd"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "sum(increase(kafka_topic_partition_current_offset{instance=~\"$instance\", topic=~\"$topic\"}[24h])) by (topic)",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Messages Produced 24 hours",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "dftgy57zq31fkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 59
+      },
+      "id": 16,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "dftgy57zq31fkd"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "sum by(topic) (increase(kafka_topic_partition_current_offset{instance=~\"$instance\", topic=~\"$topic\"}[48h]))",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Messages Produced 48 hours",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "dftgy57zq31fkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 67
+      },
+      "id": 17,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "dftgy57zq31fkd"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "sum by(topic) (increase(kafka_topic_partition_current_offset{instance=~\"$instance\", topic=~\"$topic\"}[72h]))",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Messages Produced 72 hours",
+      "type": "stat"
     }
   ],
   "preload": false,
-  "refresh": "10s",
+  "refresh": "1m",
   "schemaVersion": 40,
   "tags": [
     "kafka",
@@ -1149,7 +1379,7 @@
       {
         "current": {
           "text": "prometheus",
-          "value": "ffrw6rzzeiqdcf"
+          "value": "dftgy57zq31fkd"
         },
         "includeAll": false,
         "label": "Datasource",
@@ -1167,7 +1397,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "ffrw6rzzeiqdcf"
+          "uid": "dftgy57zq31fkd"
         },
         "definition": "label_values(kafka_brokers, job)",
         "includeAll": false,
@@ -1191,7 +1421,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "ffrw6rzzeiqdcf"
+          "uid": "dftgy57zq31fkd"
         },
         "definition": "label_values(kafka_brokers{job=~\"$job\"}, instance)",
         "includeAll": false,
@@ -1218,7 +1448,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "ffrw6rzzeiqdcf"
+          "uid": "dftgy57zq31fkd"
         },
         "definition": "label_values(kafka_topic_partition_current_offset{instance=~\"$instance\", topic!=\"__consumer_offsets\"}, topic)",
         "includeAll": true,
@@ -1239,7 +1469,7 @@
     ]
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -1256,6 +1486,6 @@
   "timezone": "browser",
   "title": "Kafka Exporter Overview (rfvbkm/kafka-exporter)",
   "uid": "rfvbkm-kafka-exporter",
-  "version": 1,
+  "version": 4,
   "weekStart": ""
 }
