@@ -68,6 +68,28 @@ services:
     volumes:
       - monitoring-grafana-data:/var/lib/grafana
 
+  alert-gateway:
+    build:
+      context: ./alert-gateway
+    container_name: alert-gateway
+    hostname: alert-gateway
+    restart: on-failure
+    ports:
+      - "8085:8080"
+    env_file:
+      - ./alert-gateway/.env
+    environment:
+      LISTEN_ADDR: ":8080"
+      CONFIG_PATH: "/app/config/config.yaml"
+    volumes:
+      - ./alert-gateway/config/config.yaml:/app/config/config.yaml:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
 volumes:
   monitoring-prometheus-data:
   monitoring-grafana-data:

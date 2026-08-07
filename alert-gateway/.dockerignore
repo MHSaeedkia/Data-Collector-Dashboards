@@ -1,0 +1,8 @@
+# Secrets never enter the build context; they are injected via env_file at runtime.
+.env
+
+.git
+.gitignore
+Dockerfile
+.dockerignore
+README.md
