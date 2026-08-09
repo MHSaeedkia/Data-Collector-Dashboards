@@ -1,0 +1,85 @@
+// Collects NiFi's log files from the data-collector project's log volume,
+// mounted read-only at /nifi-logs.
+//
+// Files are listed explicitly rather than globbed: logback rotates to
+// nifi-app_2026-08-09_10.0.log in the same directory, and a "nifi-*.log"
+// pattern would re-ingest every rotated file as if it were new.
+
+// --- logback-formatted logs (app, user, bootstrap share one format) ----------
+
+local.file_match "nifi_logback" {
+	path_targets = [
+		{__path__ = "/nifi-logs/nifi-app.log", job = "nifi", log_type = "app"},
+		{__path__ = "/nifi-logs/nifi-user.log", job = "nifi", log_type = "user"},
+		{__path__ = "/nifi-logs/nifi-bootstrap.log", job = "nifi", log_type = "bootstrap"},
+	]
+}
+
+loki.source.file "nifi_logback" {
+	targets    = local.file_match.nifi_logback.targets
+	forward_to = [loki.process.nifi_logback.receiver]
+}
+
+loki.process "nifi_logback" {
+	// The single most important stage. A Java stack trace is 30+ lines; without
+	// this each line becomes its own Loki entry and the trace is unreadable.
+	// Everything that does not start with a logback timestamp is a continuation.
+	stage.multiline {
+		firstline     = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}"
+		max_lines     = 500
+		max_wait_time = "3s"
+	}
+
+	stage.regex {
+		expression = "^(?P<ts>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}) (?P<level>[A-Z]+)\\s+\\[(?P<thread>[^\\]]+)\\] (?P<logger>\\S+)"
+	}
+
+	// Without this, entries are stamped at ingestion time — so after any Alloy
+	// restart the backfilled lines all pile up at "now" and stop lining up with
+	// the Prometheus panels. The NiFi container has no TZ set, so it logs UTC.
+	stage.timestamp {
+		source   = "ts"
+		format   = "2006-01-02 15:04:05,000"
+		location = "UTC"
+	}
+
+	// Labels are indexed, so only bounded-cardinality values may become labels.
+	// level has 5 possible values; that is safe.
+	stage.labels {
+		values = {
+			level = "level",
+		}
+	}
+
+	// thread and logger are high cardinality and must NOT be labels. As
+	// structured metadata they stay filterable without exploding the index.
+	stage.structured_metadata {
+		values = {
+			thread = "thread",
+			logger = "logger",
+		}
+	}
+
+	forward_to = [loki.write.default.receiver]
+}
+
+// --- request log (Jetty format, parsed separately) ---------------------------
+
+local.file_match "nifi_request" {
+	path_targets = [
+		{__path__ = "/nifi-logs/nifi-request.log", job = "nifi", log_type = "request"},
+	]
+}
+
+loki.source.file "nifi_request" {
+	targets    = local.file_match.nifi_request.targets
+	forward_to = [loki.write.default.receiver]
+}
+
+// --- output ------------------------------------------------------------------
+
+loki.write "default" {
+	endpoint {
+		url = "http://loki:3100/loki/api/v1/push"
+	}
+}
