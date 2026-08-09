@@ -3,6 +3,9 @@ package senders
 import (
 	"context"
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
 
 	"alert-gateway/internal/router"
 )
@@ -24,4 +27,18 @@ func New(cfg router.ChannelConfig) (Sender, error) {
 	default:
 		return nil, fmt.Errorf("unknown channel type: %q", cfg.Type)
 	}
+}
+
+// readErrorBody reads a bounded amount of an error response body so the caller
+// can put the API's own explanation into the returned error.
+func readErrorBody(resp *http.Response) string {
+	raw, err := io.ReadAll(io.LimitReader(resp.Body, 2048))
+	if err != nil {
+		return fmt.Sprintf("<body unreadable: %v>", err)
+	}
+	body := strings.TrimSpace(string(raw))
+	if body == "" {
+		return "<empty body>"
+	}
+	return body
 }

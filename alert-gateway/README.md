@@ -31,6 +31,29 @@ The server comes up on `LISTEN_ADDR` (default `:8080`).
 
 No secret or environment-specific value should ever be written directly in `config.yaml`.
 
+## Logs
+
+Logging is structured (`log/slog`, text format on stdout). `LOG_LEVEL` in `.env`
+accepts `debug`, `info` (default), `warn`, `error`.
+
+Every webhook call gets a random `req_id`, and every line produced while handling
+that call carries it — so one alert's whole journey can be followed with:
+
+```bash
+docker compose -f ../docker-compose.monitoring.yml logs alert-gateway | grep req_id=abc123
+```
+
+The line worth watching is `webhook completed`, which reports `alerts`, `sent`,
+`failed` and `duration_ms` for the call. `sent=0 failed=N` means Grafana reached
+the service but delivery failed; no `webhook received` line at all means Grafana
+never called it.
+
+At `debug` level two extra lines are emitted per call: `raw payload` (the exact
+JSON Grafana sent) and `formatted message` (the exact text handed to the senders).
+
+Failed sends include the API's own response body in the error, e.g.
+`telegram: unexpected response 400: {"ok":false,...,"description":"Bad Request: can't parse entities"}`.
+
 ## Test
 
 ```bash

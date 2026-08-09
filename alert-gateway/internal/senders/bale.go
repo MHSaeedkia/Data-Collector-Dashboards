@@ -43,6 +43,9 @@ func (b *baleSender) Send(ctx context.Context, message string) error {
 	form := url.Values{}
 	form.Set("chat_id", b.chatID)
 	form.Set("text", message)
+	// The shared formatter emits HTML (<b> tags, escaped values), so Bale has to
+	// be told to parse it too — otherwise the tags show up literally.
+	form.Set("parse_mode", "HTML")
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, strings.NewReader(form.Encode()))
 	if err != nil {
@@ -57,7 +60,7 @@ func (b *baleSender) Send(ctx context.Context, message string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 300 {
-		return fmt.Errorf("bale: unexpected response %d", resp.StatusCode)
+		return fmt.Errorf("bale: unexpected response %d: %s", resp.StatusCode, readErrorBody(resp))
 	}
 	return nil
 }

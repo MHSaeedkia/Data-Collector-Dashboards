@@ -60,7 +60,9 @@ func (t *telegramSender) Send(ctx context.Context, message string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 300 {
-		return fmt.Errorf("telegram: unexpected response %d", resp.StatusCode)
+		// The body carries the actual reason (bad chat_id, HTML parse error,
+		// 429 with retry_after, ...). Without it the status alone is useless.
+		return fmt.Errorf("telegram: unexpected response %d: %s", resp.StatusCode, readErrorBody(resp))
 	}
 	return nil
 }
