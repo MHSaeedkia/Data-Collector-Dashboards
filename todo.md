@@ -22,14 +22,20 @@
 - [x] Folder + title renamed; uid kept as `dfsv0halr3im8d` so links survive.
 - [x] Added "Staleness timeline" (state-timeline) and "Episode history per topic"
       panels for the new exporter.py episode metrics.
-- [ ] Re-import `grafana/LPA-Staleness-Monitoring/dashboard.json` in Grafana. Import
-      over the existing dashboard (same uid) rather than creating a second copy.
-- [ ] Confirm the episode metrics are actually being scraped:
-      `kafka_topic_stale_episodes_total` should appear in Prometheus. The exporter
-      must be redeployed with the new `record_staleness()` first.
-- [ ] Sanity-check "Stale since" shows a real date for a stale topic and
-      "not stale" for a healthy one — the *1000 / 0-sentinel handling is the part
-      most likely to need a tweak.
+- [x] Confirmed live: episode metrics scrape correctly and the *1000 / 0-sentinel
+      handling renders as intended ("not stale", "never", real dates).
+- [x] State-timeline panel removed (user: "useless"), and the "Staleness history
+      (per topic)" table that briefly replaced it was removed too as redundant.
+      "Episode history per topic" is now the single history panel.
+- [ ] Re-import `grafana/LPA-Staleness-Monitoring/dashboard.json` over the existing
+      dashboard (same uid `dfsv0halr3im8d`), not as a new copy.
+- [ ] **Real per-episode history** — awaiting a go-ahead. Recommended path: log
+      episodes as JSON from the exporter, ship its stdout to Loki via
+      `discovery.docker` + `loki.source.docker`, then a table panel over LogQL.
+      Details and the Postgres alternative in
+      `memory/staleness-episode-dashboard.md`.
+- [ ] ex8-raw flaps badly (25 episodes in one hour, 43 total) — worth investigating
+      the topic itself, not the dashboard.
 - [ ] Consider shrinking the original "Kafka Topic Data Freshness" panel (h=31);
       it pushes the new history panels far down the page. Left untouched on purpose.
 

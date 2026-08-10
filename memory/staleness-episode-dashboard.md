@@ -28,16 +28,54 @@ lists `__name__ 1..6` regardless; entries that do not exist are ignored by Grafa
 
 ## Panel design choices
 
-- **State timeline, not a graph.** `kafka_topic_stale` in a `state-timeline` with
-  `mergeValues: true` collapses consecutive equal samples into one bar, so each bar
-  *is* an episode — start, end and width read directly as went-stale, recovered,
-  duration. This answers "staleness history" better than any table.
+- **A state-timeline was tried and rejected by the user (2026-08-10).** The reasoning
+  was that `mergeValues: true` turns each run of stale=1 into one bar, so bars read
+  as episodes. In practice the user found it useless and asked for a table instead.
+  Do not re-propose it. It was replaced by "Staleness history (per topic)" — a plain
+  table of Topic / Stale since / Last recovery / Duration.
 - **`increase(...[$__range])` alongside the raw counter.** The raw
   `stale_episodes_total` is monotonic since exporter start, which is rarely the
   question being asked; the `$__range` version follows the dashboard time picker.
 - The pre-existing "Kafka Topic Data Freshness" table was left completely untouched,
   including its h=31 gridPos. That height pushes the new panels well down the page —
   shrinking it would be an improvement but was out of scope.
+
+## Panel history (do not re-add these)
+
+The dashboard converged on ONE history panel: "Episode history per topic".
+Two earlier attempts were explicitly rejected by the user:
+
+- a `state-timeline` of `kafka_topic_stale` (2026-08-10) — "useless";
+- a "Staleness history (per topic)" table of Stale since / Last recovery / Duration
+  (2026-08-10) — deleted as redundant, since those columns already exist in
+  "Episode history per topic".
+
+## What these metrics cannot do
+
+Only the **last** completed episode is retained (`last_stale_duration`,
+`last_recovery` are gauges, overwritten each time). A true per-episode history —
+one row per outage, several rows per topic — is **not derivable** from this
+exporter, and no dashboard trick fixes it: Prometheus can count events with
+`changes()` but cannot emit one row per event.
+
+Two ways out, both discussed with the user 2026-08-10, neither implemented yet:
+
+- **Loki (recommended).** The exporter *already* logs `topic recovered: %s (stale
+  for %.1fs)` — every such line is a completed episode. Make it JSON/logfmt, ship
+  the exporter's stdout to Loki (needs `discovery.docker` + `loki.source.docker`,
+  not the volume mount used for NiFi, because these logs go to stdout), then a
+  table panel over LogQL gives one row per episode. Reuses the pipeline that
+  already exists. Retention = Loki's 15d.
+- **Postgres.** INSERT `(topic, started_at, ended_at, duration_seconds)` on each
+  recovery. Wins for retention beyond 15d, aggregation, and joins against
+  `exchange_markets`.
+
+Both only record going forward — episodes already past are lost — and both still
+miss episodes shorter than one `poll_interval_seconds`.
+
+Episode state is in-memory in the exporter, so "Episodes (total)" resets to 0 on
+every restart and an in-flight episode is forgotten. It reads like an all-time
+figure but is really "since this process started".
 
 See also `grafana-alerting-wiring.md` — the alert rule name `KafkaTopicStale` is
 unrelated to the dashboard title and is NOT affected by this rename.

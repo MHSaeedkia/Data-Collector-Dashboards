@@ -1,41 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "Prometheus",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
-  "__elements": {},
-  "__requires": [
-    {
-      "type": "panel",
-      "id": "table",
-      "name": "Table",
-      "version": ""
-    },
-    {
-      "type": "panel",
-      "id": "state-timeline",
-      "name": "State timeline",
-      "version": ""
-    },
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "11.4.0"
-    },
-    {
-      "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
-      "version": "1.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -56,13 +19,13 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
+  "id": 21,
   "links": [],
   "panels": [
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "dftgy57zq31fkd"
       },
       "fieldConfig": {
         "defaults": {
@@ -193,7 +156,7 @@
         ]
       },
       "gridPos": {
-        "h": 31,
+        "h": 12,
         "w": 24,
         "x": 0,
         "y": 0
@@ -222,7 +185,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "kafka_topic_seconds_since_last_message",
@@ -235,7 +198,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "kafka_topic_stale",
@@ -248,7 +211,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -312,7 +275,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 12
       },
       "id": 2,
       "panels": [],
@@ -322,103 +285,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "description": "Each bar is one continuous episode of stale=1. Bar start is when the topic went stale, bar end is when it recovered, bar width is the outage duration.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "fillOpacity": 85,
-            "lineWidth": 0,
-            "spanNulls": false,
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "color": "green",
-                  "index": 0,
-                  "text": "OK"
-                },
-                "1": {
-                  "color": "red",
-                  "index": 1,
-                  "text": "STALE"
-                },
-                "-1": {
-                  "color": "orange",
-                  "index": 2,
-                  "text": "UNKNOWN"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 32
-      },
-      "id": 3,
-      "options": {
-        "alignValue": "center",
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "mergeValues": true,
-        "rowHeight": 0.9,
-        "showValue": "auto",
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "kafka_topic_stale",
-          "instant": false,
-          "legendFormat": "{{topic}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Staleness timeline (per topic)",
-      "type": "state-timeline"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "dftgy57zq31fkd"
       },
       "description": "Episode metrics from exporter.py. 'Stale since' is the start of the CURRENT episode (blank when healthy); 'Last outage duration' is the length of the last COMPLETED episode.",
       "fieldConfig": {
@@ -486,14 +353,14 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "type": "value",
                     "options": {
                       "0": {
                         "color": "green",
                         "index": 0,
                         "text": "not stale"
                       }
-                    }
+                    },
+                    "type": "value"
                   }
                 ]
               },
@@ -517,14 +384,14 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "type": "value",
                     "options": {
                       "0": {
                         "color": "text",
                         "index": 0,
                         "text": "never"
                       }
-                    }
+                    },
+                    "type": "value"
                   }
                 ]
               },
@@ -548,14 +415,14 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "type": "value",
                     "options": {
                       "0": {
                         "color": "text",
                         "index": 0,
                         "text": "none yet"
                       }
-                    }
+                    },
+                    "type": "value"
                   }
                 ]
               },
@@ -627,7 +494,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 42
+        "y": 13
       },
       "id": 4,
       "options": {
@@ -643,8 +510,8 @@
         "showHeader": true,
         "sortBy": [
           {
-            "desc": true,
-            "displayName": "Stale since"
+            "desc": false,
+            "displayName": "Topic"
           }
         ]
       },
@@ -653,7 +520,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "kafka_topic_stale_since_timestamp_seconds * 1000",
@@ -667,7 +534,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "kafka_topic_last_recovery_timestamp_seconds * 1000",
@@ -681,7 +548,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "kafka_topic_last_stale_duration_seconds",
@@ -695,7 +562,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "increase(kafka_topic_stale_episodes_total[$__range])",
@@ -709,7 +576,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "kafka_topic_stale_episodes_total",
@@ -723,7 +590,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "dftgy57zq31fkd"
           },
           "editorMode": "code",
           "expr": "kafka_topic_stale_seconds_total",
@@ -750,48 +617,48 @@
             "excludeByName": {
               "Time": true,
               "Time 1": true,
-              "__name__ 1": true,
-              "instance 1": true,
-              "job 1": true,
               "Time 2": true,
-              "__name__ 2": true,
-              "instance 2": true,
-              "job 2": true,
               "Time 3": true,
-              "__name__ 3": true,
-              "instance 3": true,
-              "job 3": true,
               "Time 4": true,
-              "__name__ 4": true,
-              "instance 4": true,
-              "job 4": true,
               "Time 5": true,
-              "__name__ 5": true,
-              "instance 5": true,
-              "job 5": true,
               "Time 6": true,
+              "__name__ 1": true,
+              "__name__ 2": true,
+              "__name__ 3": true,
+              "__name__ 4": true,
+              "__name__ 5": true,
               "__name__ 6": true,
+              "instance 1": true,
+              "instance 2": true,
+              "instance 3": true,
+              "instance 4": true,
+              "instance 5": true,
               "instance 6": true,
+              "job 1": true,
+              "job 2": true,
+              "job 3": true,
+              "job 4": true,
+              "job 5": true,
               "job 6": true
             },
             "includeByName": {},
             "indexByName": {
-              "topic": 0,
               "Value #A": 1,
               "Value #B": 2,
               "Value #C": 3,
               "Value #D": 4,
               "Value #E": 5,
-              "Value #F": 6
+              "Value #F": 6,
+              "topic": 0
             },
             "renameByName": {
-              "topic": "Topic",
               "Value #A": "Stale since",
               "Value #B": "Last recovery",
               "Value #C": "Last outage duration",
               "Value #D": "Episodes (in range)",
               "Value #E": "Episodes (total)",
-              "Value #F": "Total time stale"
+              "Value #F": "Total time stale",
+              "topic": "Topic"
             }
           }
         }
@@ -814,6 +681,6 @@
   "timezone": "browser",
   "title": "LPA Staleness Monitoring",
   "uid": "dfsv0halr3im8d",
-  "version": 4,
+  "version": 1,
   "weekStart": ""
 }
