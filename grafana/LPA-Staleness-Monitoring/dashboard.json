@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 21,
+  "id": 23,
   "links": [],
   "panels": [
     {
@@ -510,8 +510,8 @@
         "showHeader": true,
         "sortBy": [
           {
-            "desc": false,
-            "displayName": "Topic"
+            "desc": true,
+            "displayName": "Stale since"
           }
         ]
       },
@@ -681,6 +681,6 @@
   "timezone": "browser",
   "title": "LPA Staleness Monitoring",
   "uid": "dfsv0halr3im8d",
-  "version": 1,
+  "version": 3,
   "weekStart": ""
 }
