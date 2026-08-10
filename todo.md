@@ -17,6 +17,22 @@
 - [ ] Point the Grafana Webhook contact point at `http://alert-gateway:8080/alert`
       (container port, not the published 8085).
 
+## LPA Staleness Monitoring (renamed from KAFKA-Topic-Staleness-Monitor)
+
+- [x] Folder + title renamed; uid kept as `dfsv0halr3im8d` so links survive.
+- [x] Added "Staleness timeline" (state-timeline) and "Episode history per topic"
+      panels for the new exporter.py episode metrics.
+- [ ] Re-import `grafana/LPA-Staleness-Monitoring/dashboard.json` in Grafana. Import
+      over the existing dashboard (same uid) rather than creating a second copy.
+- [ ] Confirm the episode metrics are actually being scraped:
+      `kafka_topic_stale_episodes_total` should appear in Prometheus. The exporter
+      must be redeployed with the new `record_staleness()` first.
+- [ ] Sanity-check "Stale since" shows a real date for a stale topic and
+      "not stale" for a healthy one — the *1000 / 0-sentinel handling is the part
+      most likely to need a tweak.
+- [ ] Consider shrinking the original "Kafka Topic Data Freshness" panel (h=31);
+      it pushes the new history panels far down the page. Left untouched on purpose.
+
 ## NiFi logs in Grafana (Loki + Alloy)
 
 Added 2026-08-09 — see `memory/nifi-log-pipeline.md`. Nothing below has been run;
@@ -24,19 +40,21 @@ the Docker daemon was unavailable when it was written.
 
 - [x] `loki` + `alloy` services, `loki/config.yaml`, `alloy/config.alloy`,
       `grafana/NiFi-Logs/dashboard.json`.
-- [ ] Confirm the external volume name resolves:
-      `docker volume ls | grep nifi-logs` should show
-      `data-collector_data-collector-nifi-logs`. If the other project was started
-      with a different `-p`/directory name, fix the `name:` in the compose volumes block.
-- [ ] Bring it up, then check the Alloy UI at `http://localhost:12345` — the
-      `loki.source.file` components should show the NiFi files as active targets.
+- [x] External volume name resolves — Alloy started, which it could not do if
+      `data-collector_data-collector-nifi-logs` were missing.
+- [x] `stage.structured_metadata` is accepted by Alloy v1.5.1 (component healthy).
+- [x] Alloy is up at `<host>:12345`, all 6 components healthy. NOTE: healthy only
+      means the components loaded — a `loki.source.file` with zero matched targets
+      is also green, so this does not prove logs are flowing.
+- [ ] Prove data reached Loki:
+      `docker compose ... exec loki wget -qO- http://localhost:3100/loki/api/v1/labels`
+      should list `job`, `log_type`, `level`.
 - [ ] Add the Loki datasource in Grafana (`http://loki:3100`) and import
       `grafana/NiFi-Logs/dashboard.json`.
 - [ ] Verify a stack trace arrives as ONE log entry, not 30. If not, the multiline
       firstline regex needs adjusting to the real logback pattern.
-- [ ] Verify `stage.structured_metadata` is accepted by the pinned Alloy version —
-      it is the least certain part of the config. If it errors, drop the stage;
-      thread/logger remain searchable in the line text.
+- [ ] Verify timestamps are not all clustered at container-start time — that would
+      mean the `location = "UTC"` assumption is wrong for this NiFi.
 - [ ] Bump `grafana/loki:3.3.2` and `grafana/alloy:v1.5.1` to current releases.
 - [ ] Watch disk use for the first week. NiFi at DEBUG can produce GBs/day; the
       `ingestion_rate_mb` cap will show up as 429s in the Alloy logs if hit.
