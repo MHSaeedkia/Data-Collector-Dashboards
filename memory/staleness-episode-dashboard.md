@@ -40,6 +40,24 @@ lists `__name__ 1..6` regardless; entries that do not exist are ignored by Grafa
   including its h=31 gridPos. That height pushes the new panels well down the page —
   shrinking it would be an improvement but was out of scope.
 
+## Datasource references in the JSON (2026-08-10)
+
+The Postgres datasource is an **import-time input**: `__inputs` declares
+`DS_POSTGRES` (pluginId `grafana-postgresql-datasource`) and the three places that
+need it — panel 6, its target, and the `topic` template variable — reference
+`${DS_POSTGRES}`. Grafana only shows the import options form when `__inputs` is
+present, so that block is what makes the picker appear; do not drop it.
+
+**The Prometheus uid is still hardcoded** (`dftgy57zq31fkd`, 11 references) because
+the file was re-exported from the Grafana UI with plain "Export", which bakes in
+real uids. Panels keep working in this Grafana instance but would break in any
+other, or if that datasource is ever recreated. Fixing it means adding a
+`DS_PROMETHEUS` input and swapping those 11 refs — offered and not yet taken up.
+
+Note: the episode-log panel uses `repeat: "topic"`, so `WHERE topic = '$topic'`
+in its SQL is correct — each repeated instance receives a single value. It would
+be a quoting bug only if the panel did not repeat.
+
 ## Panel history (do not re-add these)
 
 The dashboard converged on ONE history panel: "Episode history per topic".

@@ -1,4 +1,14 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_POSTGRES",
+      "label": "PostgreSQL",
+      "description": "Database holding topic_staleness_episodes",
+      "type": "datasource",
+      "pluginId": "grafana-postgresql-datasource",
+      "pluginName": "PostgreSQL"
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -681,7 +691,7 @@
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "PLACEHOLDER_PG_UID"
+        "uid": "${DS_POSTGRES}"
       },
       "description": "Every recorded staleness episode for this topic, newest first, from the postgres table topic_staleness_episodes written by exporter.py. An episode with no 'Recovered at' is still open — the topic is stale right now, and its duration counts up from the start. Boundaries are only observed at poll time, so every timestamp and duration is accurate to within one poll_interval_seconds.",
       "fieldConfig": {
@@ -888,7 +898,7 @@
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "PLACEHOLDER_PG_UID"
+            "uid": "${DS_POSTGRES}"
           },
           "editorMode": "code",
           "format": "table",
@@ -937,7 +947,7 @@
         },
         "datasource": {
           "type": "grafana-postgresql-datasource",
-          "uid": "PLACEHOLDER_PG_UID"
+          "uid": "${DS_POSTGRES}"
         },
         "definition": "SELECT DISTINCT topic FROM topic_staleness_episodes ORDER BY topic",
         "description": "Which topics get an episode-log table. One table is repeated per selected value.",
