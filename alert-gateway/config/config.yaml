@@ -1,0 +1,29 @@
+# This file defines the routing structure.
+# Any value written as ${VAR} or ${VAR:-default} is substituted from .env at runtime.
+# No token or secret is ever written here directly.
+
+# Rules are checked in order. The first rule whose conditions all match
+# the alert's labels wins.
+routes:
+  - name: "kafka-staleness"
+    match:
+      severity: critical
+      alertname: KafkaTopicStale
+    channels: ["telegram","bale"]
+
+# If no rule matched, the alert goes to these channels
+default_channels: ["telegram","bale"]
+
+# Channel definitions. type determines which sender implementation is used.
+channels:
+  telegram:
+    type: telegram
+    bot_token: "${TELEGRAM_BOT_TOKEN}"
+    chat_id: "${TELEGRAM_CHAT_ID}"
+    proxy_url: "${TELEGRAM_PROXY_URL:-}"
+
+  bale:
+    type: bale
+    bot_token: "${BALE_BOT_TOKEN}"
+    chat_id: "${BALE_CHAT_ID}"
+    api_base: "${BALE_API_BASE:-https://tapi.bale.ai}"
