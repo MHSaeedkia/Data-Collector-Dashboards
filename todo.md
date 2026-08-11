@@ -1,5 +1,18 @@
 # TODO
 
+## Networking
+
+- [x] Monitoring stack's `default` network is now the external
+      `data-collector_data-collector-net` — see `memory/cross-project-networking.md`.
+- [ ] Recreate the containers so they actually move onto the shared network:
+      `docker compose -f docker-compose.monitoring.yml up -d --force-recreate`
+      (data-collector must be running first).
+- [ ] Verify from inside the stack, e.g.
+      `docker compose -f docker-compose.monitoring.yml exec prometheus wget -qO- http://lpa-staleness-exporter:9309/metrics | head`
+- [ ] Flink now exposes Prometheus metrics (jobmanager :9249, taskmanager :9250)
+      but nothing scrapes them. Adding two scrape jobs to `prometheus/prometheus.yml`
+      is all that is needed — not done, since only the network change was asked for.
+
 ## Done
 
 - [x] Dockerfile for `alert-gateway` (multi-stage, static binary, non-root, healthcheck).

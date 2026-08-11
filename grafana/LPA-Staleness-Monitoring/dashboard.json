@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "Freshness status of each Kafka topic based on the last observed message and each topic's own threshold, plus the staleness episode history (when each topic went stale, when it recovered, and for how long)",
+  "description": "Freshness status of each Kafka topic based on the last observed message and each topic's own threshold, the current/last staleness episode per topic, and a per-topic table of every recorded staleness episode (when it went stale, when it recovered, for how long)",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -664,6 +664,259 @@
         }
       ],
       "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
+      "id": 5,
+      "panels": [],
+      "title": "Episode log per topic",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "PLACEHOLDER_PG_UID"
+      },
+      "description": "Every recorded staleness episode for this topic, newest first, from the postgres table topic_staleness_episodes written by exporter.py. An episode with no 'Recovered at' is still open — the topic is stale right now, and its duration counts up from the start. Boundaries are only observed at poll time, so every timestamp and duration is accurate to within one poll_interval_seconds.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": false,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Went stale at"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeAsIso"
+              },
+              {
+                "id": "custom.width",
+                "value": 200
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Recovered at"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeAsIso"
+              },
+              {
+                "id": "custom.width",
+                "value": 200
+              },
+              {
+                "id": "noValue",
+                "value": "— still stale —"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.width",
+                "value": 160
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Threshold"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.width",
+                "value": 140
+              },
+              {
+                "id": "noValue",
+                "value": "n/a"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "ongoing": {
+                        "color": "red",
+                        "index": 0
+                      },
+                      "recovered": {
+                        "color": "green",
+                        "index": 1
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 26
+      },
+      "id": 6,
+      "maxPerRow": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.4.0",
+      "repeat": "topic",
+      "repeatDirection": "h",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "PLACEHOLDER_PG_UID"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  stale_since                     AS \"Went stale at\",\n  recovered_at                    AS \"Recovered at\",\n  COALESCE(duration_seconds, EXTRACT(EPOCH FROM (now() - stale_since)))::float8\n                                  AS \"Duration\",\n  threshold_seconds               AS \"Threshold\",\n  CASE WHEN recovered_at IS NULL THEN 'ongoing' ELSE 'recovered' END\n                                  AS \"Status\"\nFROM topic_staleness_episodes\nWHERE topic = '$topic'\n  -- Overlap, not containment: an episode that started before the dashboard\n  -- window but is still running (or ended inside it) is the one you most want\n  -- to see. $__timeFilter(stale_since) would hide exactly those.\n  AND stale_since <= $__timeTo()\n  AND COALESCE(recovered_at, now()) >= $__timeFrom()\nORDER BY stale_since DESC\nLIMIT 500",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "$topic",
+      "transformations": [],
+      "type": "table"
     }
   ],
   "preload": false,
@@ -671,7 +924,37 @@
   "schemaVersion": 40,
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "PLACEHOLDER_PG_UID"
+        },
+        "definition": "SELECT DISTINCT topic FROM topic_staleness_episodes ORDER BY topic",
+        "description": "Which topics get an episode-log table. One table is repeated per selected value.",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Topic",
+        "multi": true,
+        "name": "topic",
+        "options": [],
+        "query": "SELECT DISTINCT topic FROM topic_staleness_episodes ORDER BY topic",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-1h",
@@ -681,6 +964,6 @@
   "timezone": "browser",
   "title": "LPA Staleness Monitoring",
   "uid": "dfsv0halr3im8d",
-  "version": 3,
+  "version": 4,
   "weekStart": ""
 }

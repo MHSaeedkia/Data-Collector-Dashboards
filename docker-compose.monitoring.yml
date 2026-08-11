@@ -16,9 +16,6 @@ services:
       - "--storage.tsdb.retention.time=15d"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    networks:
-      - default
-      - nifi_network
     healthcheck:
       test: [ "CMD-SHELL", "wget -q --spider http://localhost:9090/-/healthy || exit 1" ]
       interval: 15s
@@ -31,8 +28,6 @@ services:
     container_name: nifi-token-refresher
     restart: unless-stopped
     user: root
-    networks:
-      - nifi_network
     environment:
       NIFI_URL: "https://nifi:8443"
       NIFI_USER: "admin"
@@ -140,7 +135,14 @@ volumes:
     name: "data-collector_data-collector-nifi-logs"
 
 networks:
+  # The monitoring stack has no network of its own: its default network IS the
+  # data-collector project's network. Every service here therefore resolves
+  # kafka, nifi, postgres, lpa-staleness-exporter, jobmanager, ... by service
+  # name, and the data-collector services can reach back the same way.
+  #
+  # Consequence: data-collector must be up FIRST. Compose will not create an
+  # external network, so starting this stack alone fails with
+  # "network ... declared as external, but could not be found".
   default:
-  nifi_network:
     external: true
     name: "data-collector_data-collector-net"
