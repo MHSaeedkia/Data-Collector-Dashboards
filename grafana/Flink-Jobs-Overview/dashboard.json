@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 12,
+  "id": 25,
   "links": [],
   "panels": [
     {
@@ -191,7 +191,7 @@
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "sum(flink_taskmanager_job_task_numRecordsInPerSecond)",
+          "expr": "sum(flink_taskmanager_job_task_numRecordsInPerSecond{task_name=~\"Source:.*\"})",
           "refId": "A"
         }
       ],
@@ -250,7 +250,7 @@
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "sum(flink_taskmanager_job_task_numRecordsOutPerSecond)",
+          "expr": "sum(flink_taskmanager_job_task_numRecordsOutPerSecond{task_name=~\".*sink.*\"})",
           "refId": "A"
         }
       ],
@@ -479,6 +479,18 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Job"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 212
+              }
+            ]
           }
         ]
       },
@@ -510,13 +522,13 @@
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsInPerSecond)",
+          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsInPerSecond{task_name=~\"Source:.*\"})",
           "format": "table",
           "instant": true,
           "refId": "A"
         },
         {
-          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsOutPerSecond)",
+          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsOutPerSecond{task_name=~\".*sink.*\"})",
           "format": "table",
           "instant": true,
           "refId": "B"
@@ -668,7 +680,7 @@
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsInPerSecond)",
+          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsInPerSecond{task_name=~\"Source:.*\"})",
           "legendFormat": "{{job_name}}",
           "refId": "A"
         }
@@ -760,7 +772,7 @@
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsOutPerSecond)",
+          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsOutPerSecond{task_name=~\".*sink.*\"})",
           "legendFormat": "{{job_name}}",
           "refId": "A"
         }
@@ -1099,6 +1111,7 @@
             }
           },
           "mappings": [],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1138,7 +1151,7 @@
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsInPerSecond) - sum by (job_name) (flink_taskmanager_job_task_numRecordsOutPerSecond)",
+          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsInPerSecond{task_name=~\"Source:.*\"}) - sum by (job_name) (flink_taskmanager_job_task_numRecordsOutPerSecond{task_name=~\".*sink.*\"})",
           "legendFormat": "{{job_name}}",
           "refId": "A"
         }
@@ -1232,12 +1245,12 @@
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "sum by (job_name) (rate(flink_taskmanager_job_task_numRecordsIn{job_name=~\"normalizer_aggregator|normalizer_type_validator|normalizer_book_builder|normalizer_precision|normalizer_rebaser|normalizer_pair_extractor\"}[1m]))",
+          "expr": "sum by (job_name) (rate(flink_taskmanager_job_task_numRecordsIn{job_name=~\"normalizer_aggregator|normalizer_type_validator|normalizer_book_builder|normalizer_precision|normalizer_rebaser|normalizer_pair_extractor\",task_name=~\"Source:.*\"}[1m]))",
           "legendFormat": "{{job_name}} - IN",
           "refId": "A"
         },
         {
-          "expr": "sum by (job_name) (rate(flink_taskmanager_job_task_numRecordsOut{job_name=~\"normalizer_aggregator|normalizer_type_validator|normalizer_book_builder|normalizer_precision|normalizer_rebaser|normalizer_pair_extractor\"}[1m]))",
+          "expr": "sum by (job_name) (rate(flink_taskmanager_job_task_numRecordsOut{job_name=~\"normalizer_aggregator|normalizer_type_validator|normalizer_book_builder|normalizer_precision|normalizer_rebaser|normalizer_pair_extractor\",task_name=~\".*sink.*\"}[1m]))",
           "legendFormat": "{{job_name}} - OUT",
           "refId": "B"
         }
@@ -1449,8 +1462,12 @@
     "list": [
       {
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": {
           "type": "prometheus",
@@ -1478,6 +1495,6 @@
   "timezone": "",
   "title": "Flink Jobs & Operator Monitoring",
   "uid": "flink-operator-monitoring",
-  "version": 13,
+  "version": 3,
   "weekStart": ""
 }
