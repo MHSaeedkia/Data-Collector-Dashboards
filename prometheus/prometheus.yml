@@ -13,24 +13,46 @@ scrape_configs:
     authorization:
       type: Bearer
       credentials_file: /etc/prometheus/secrets/nifi_token.txt
+
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
+
   - job_name: 'redis'
     static_configs:
       - targets: ['redis-exporter:9121']
+
   - job_name: 'kafka'
     static_configs:
       - targets: ['kafka-exporter:9308']
+
   - job_name: 'kafka-staleness'
     static_configs:
       - targets: ['kafka-staleness-exporter:9309']
+
   - job_name: 'node-exporter'
     static_configs:
       - targets: ['host.docker.internal:9100']
+
   - job_name: 'flink-jobmanager'
     static_configs:
       - targets: ['jobmanager:9249']
+
   - job_name: 'flink-taskmanager'
-    static_configs:
-      - targets: ['taskmanager:9250']
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 10s
+
+    relabel_configs:
+      - source_labels: [__meta_docker_container_name]
+        regex: '/data-collector-taskmanager-[0-9]+'
+        action: keep
+
+      - source_labels: [__meta_docker_network_ip]
+        target_label: __address__
+        replacement: '$1:9250'
+
+      - source_labels: [__meta_docker_container_name]
+        regex: '/(.+)'
+        target_label: instance
+        replacement: '$1'
