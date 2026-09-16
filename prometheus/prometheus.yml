@@ -56,3 +56,7 @@ scrape_configs:
         regex: '/(.+)'
         target_label: instance
         replacement: '$1'
+  
+  - job_name: 'autoscaler'
+    static_configs:
+      - targets: ['autoscaler:9091']
