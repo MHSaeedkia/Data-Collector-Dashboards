@@ -10,6 +10,9 @@ services:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - nifi-token:/etc/prometheus/secrets:ro
       - monitoring-prometheus-data:/prometheus
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    group_add:
+      - "995"
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
