@@ -191,7 +191,7 @@
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "sum(flink_taskmanager_job_task_numRecordsInPerSecond)",
+          "expr": "sum(flink_taskmanager_job_task_numRecordsInPerSecond{task_name=~\"Source:.*\"})",
           "refId": "A"
         }
       ],
@@ -250,7 +250,7 @@
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "sum(flink_taskmanager_job_task_numRecordsOutPerSecond)",
+          "expr": "sum(flink_taskmanager_job_task_numRecordsOutPerSecond{task_name=~\".*sink.*\"})",
           "refId": "A"
         }
       ],
@@ -479,6 +479,18 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Job"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 212
+              }
+            ]
           }
         ]
       },
@@ -510,13 +522,13 @@
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsInPerSecond)",
+          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsInPerSecond{task_name=~\"Source:.*\"})",
           "format": "table",
           "instant": true,
           "refId": "A"
         },
         {
-          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsOutPerSecond)",
+          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsOutPerSecond{task_name=~\".*sink.*\"})",
           "format": "table",
           "instant": true,
           "refId": "B"
@@ -562,12 +574,12 @@
               "Time": true
             },
             "indexByName": {
-              "Value #A": 1,
-              "Value #B": 2,
-              "Value #C": 3,
-              "Value #D": 4,
-              "Value #E": 5,
-              "Value #F": 6,
+              "Value #A": 2,
+              "Value #B": 3,
+              "Value #C": 4,
+              "Value #D": 5,
+              "Value #E": 6,
+              "Value #F": 7,
               "job_name": 0
             },
             "renameByName": {
@@ -577,6 +589,269 @@
               "Value #D": "Idle %",
               "Value #E": "Backpressure %",
               "Value #F": "Health Score",
+              "job_name": "Job"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Current autoscaler state for all Flink jobs.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Parallelism"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.width",
+                "value": 112
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Target Parallelism"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TaskManagers"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.width",
+                "value": 141
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Target TaskManagers"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.width",
+                "value": 174
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Up Cycles"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.width",
+                "value": 121
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Down Cycles"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.width",
+                "value": 145
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Job"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 266
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Action"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 104
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 21,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "expr": "flink_job_parallelism",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        },
+        {
+          "expr": "flink_job_target_parallelism",
+          "format": "table",
+          "instant": true,
+          "refId": "B"
+        },
+        {
+          "expr": "flink_job_taskmanagers",
+          "format": "table",
+          "instant": true,
+          "refId": "C"
+        },
+        {
+          "expr": "flink_job_target_taskmanagers",
+          "format": "table",
+          "instant": true,
+          "refId": "D"
+        },
+        {
+          "expr": "flink_job_up_cycles",
+          "format": "table",
+          "instant": true,
+          "refId": "E"
+        },
+        {
+          "expr": "flink_job_down_cycles",
+          "format": "table",
+          "instant": true,
+          "refId": "F"
+        },
+        {
+          "expr": "flink_job_action",
+          "format": "table",
+          "instant": true,
+          "refId": "G"
+        }
+      ],
+      "title": "Flink Autoscaler State",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "job_name",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__ 1": true,
+              "__name__ 2": true,
+              "__name__ 3": true,
+              "__name__ 4": true,
+              "__name__ 5": true,
+              "__name__ 6": true,
+              "__name__ 7": true,
+              "instance": true,
+              "job": true
+            },
+            "indexByName": {
+              "Value #A": 1,
+              "Value #B": 2,
+              "Value #C": 3,
+              "Value #D": 4,
+              "Value #E": 5,
+              "Value #F": 6,
+              "Value #G": 7,
+              "job_name": 0
+            },
+            "renameByName": {
+              "Value #A": "Parallelism",
+              "Value #B": "Target Parallelism",
+              "Value #C": "TaskManagers",
+              "Value #D": "Target TaskManagers",
+              "Value #E": "Up Cycles",
+              "Value #F": "Down Cycles",
+              "Value #G": "Action",
               "job_name": "Job"
             }
           }
@@ -644,13 +919,34 @@
           },
           "unit": "ops"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value #G"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Parallelism"
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 14
+        "y": 24
       },
       "id": 6,
       "options": {
@@ -668,7 +964,7 @@
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsInPerSecond)",
+          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsInPerSecond{task_name=~\"Source:.*\"})",
           "legendFormat": "{{job_name}}",
           "refId": "A"
         }
@@ -742,7 +1038,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 14
+        "y": 24
       },
       "id": 7,
       "options": {
@@ -760,7 +1056,7 @@
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsOutPerSecond)",
+          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsOutPerSecond{task_name=~\".*sink.*\"})",
           "legendFormat": "{{job_name}}",
           "refId": "A"
         }
@@ -839,7 +1135,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 22
+        "y": 32
       },
       "id": 8,
       "options": {
@@ -932,7 +1228,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 22
+        "y": 32
       },
       "id": 9,
       "options": {
@@ -1029,7 +1325,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 30
+        "y": 40
       },
       "id": 10,
       "options": {
@@ -1099,6 +1395,8 @@
             }
           },
           "mappings": [],
+          "max": 100,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1120,7 +1418,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 30
+        "y": 40
       },
       "id": 11,
       "options": {
@@ -1138,7 +1436,7 @@
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsInPerSecond) - sum by (job_name) (flink_taskmanager_job_task_numRecordsOutPerSecond)",
+          "expr": "sum by (job_name) (flink_taskmanager_job_task_numRecordsInPerSecond{task_name=~\"Source:.*\"}) - sum by (job_name) (flink_taskmanager_job_task_numRecordsOutPerSecond{task_name=~\".*sink.*\"})",
           "legendFormat": "{{job_name}}",
           "refId": "A"
         }
@@ -1212,7 +1510,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 48
       },
       "id": 5,
       "options": {
@@ -1232,12 +1530,12 @@
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "sum by (job_name) (rate(flink_taskmanager_job_task_numRecordsIn{job_name=~\"normalizer_aggregator|normalizer_type_validator|normalizer_book_builder|normalizer_precision|normalizer_rebaser|normalizer_pair_extractor\"}[1m]))",
+          "expr": "sum by (job_name) (rate(flink_taskmanager_job_task_numRecordsIn{job_name=~\"normalizer_aggregator|normalizer_type_validator|normalizer_book_builder|normalizer_precision|normalizer_rebaser|normalizer_pair_extractor\",task_name=~\"Source:.*\"}[1m]))",
           "legendFormat": "{{job_name}} - IN",
           "refId": "A"
         },
         {
-          "expr": "sum by (job_name) (rate(flink_taskmanager_job_task_numRecordsOut{job_name=~\"normalizer_aggregator|normalizer_type_validator|normalizer_book_builder|normalizer_precision|normalizer_rebaser|normalizer_pair_extractor\"}[1m]))",
+          "expr": "sum by (job_name) (rate(flink_taskmanager_job_task_numRecordsOut{job_name=~\"normalizer_aggregator|normalizer_type_validator|normalizer_book_builder|normalizer_precision|normalizer_rebaser|normalizer_pair_extractor\",task_name=~\".*sink.*\"}[1m]))",
           "legendFormat": "{{job_name}} - OUT",
           "refId": "B"
         }
@@ -1299,8 +1597,12 @@
                 "value": null
               },
               {
+                "color": "yellow",
+                "value": 70
+              },
+              {
                 "color": "red",
-                "value": 80
+                "value": 90
               }
             ]
           },
@@ -1312,7 +1614,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 46
+        "y": 56
       },
       "id": 12,
       "options": {
@@ -1404,7 +1706,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 46
+        "y": 56
       },
       "id": 13,
       "options": {
@@ -1478,6 +1780,6 @@
   "timezone": "",
   "title": "Flink Jobs & Operator Monitoring",
   "uid": "flink-operator-monitoring",
-  "version": 13,
+  "version": 46,
   "weekStart": ""
 }
