@@ -1,0 +1,161 @@
+{
+  "title": "NiFi Logs",
+  "uid": "nifi-logs",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "type": "datasource",
+        "name": "loki",
+        "label": "Loki",
+        "query": "loki",
+        "hide": 0,
+        "current": {}
+      },
+      {
+        "type": "custom",
+        "name": "log_type",
+        "label": "Log file",
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".+",
+        "query": "app,user,bootstrap,request",
+        "current": { "text": ["app"], "value": ["app"] },
+        "options": []
+      },
+      {
+        "type": "custom",
+        "name": "level",
+        "label": "Level",
+        "multi": true,
+        "includeAll": true,
+        "_comment": "allValue is .* not .+ so the request log, which has no level label, is not filtered out",
+        "allValue": ".*",
+        "query": "ERROR,WARN,INFO,DEBUG,TRACE",
+        "current": { "text": ["All"], "value": ["$__all"] },
+        "options": []
+      },
+      {
+        "type": "textbox",
+        "name": "search",
+        "label": "Search text",
+        "query": "",
+        "current": { "text": "", "value": "" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Log volume by level",
+      "id": 1,
+      "gridPos": { "h": 8, "w": 18, "x": 0, "y": 0 },
+      "datasource": { "type": "loki", "uid": "${loki}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "bars", "fillOpacity": 70, "stacking": { "mode": "normal" } },
+          "unit": "short"
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "ERROR" },
+            "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] },
+          { "matcher": { "id": "byName", "options": "WARN" },
+            "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } } ] },
+          { "matcher": { "id": "byName", "options": "INFO" },
+            "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } } ] }
+        ]
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "loki", "uid": "${loki}" },
+          "expr": "sum by (level) (count_over_time({job=\"nifi\", log_type=~\"$log_type\"} [$__auto]))",
+          "legendFormat": "{{level}}"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Errors in range",
+      "id": 2,
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "loki", "uid": "${loki}" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "red", "value": 25 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
+        "colorMode": "background",
+        "graphMode": "area"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "loki", "uid": "${loki}" },
+          "expr": "sum (count_over_time({job=\"nifi\", log_type=~\"$log_type\", level=\"ERROR\"} [$__auto]))",
+          "legendFormat": "errors"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "Errors and warnings",
+      "id": 3,
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
+      "datasource": { "type": "loki", "uid": "${loki}" },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false,
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "sortOrder": "Descending"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "loki", "uid": "${loki}" },
+          "expr": "{job=\"nifi\", log_type=~\"$log_type\", level=~\"ERROR|WARN\"} |= \"$search\""
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "All logs",
+      "id": 4,
+      "gridPos": { "h": 14, "w": 24, "x": 0, "y": 18 },
+      "datasource": { "type": "loki", "uid": "${loki}" },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false,
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "sortOrder": "Descending"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "loki", "uid": "${loki}" },
+          "expr": "{job=\"nifi\", log_type=~\"$log_type\", level=~\"$level\"} |= \"$search\""
+        }
+      ]
+    }
+  ]
+}
