@@ -135,7 +135,7 @@ volumes:
   # Nothing here creates or manages it — `docker volume ls` to confirm the name.
   nifi-logs:
     external: true
-    name: "data-collector_data-collector-nifi-logs"
+    name: "lpa-core_data-collector-nifi-logs"
 
 networks:
   # The monitoring stack has no network of its own: its default network IS the
@@ -148,4 +148,4 @@ networks:
   # "network ... declared as external, but could not be found".
   default:
     external: true
-    name: "data-collector_data-collector-net"
+    name: "lpa-core_data-collector-net"
